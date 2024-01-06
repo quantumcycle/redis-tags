@@ -1,0 +1,30 @@
+name: Test PR
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Go 1.21
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
+          cache-dependency-path: golang/go.mod
+      
+      - uses: shogo82148/actions-setup-redis@v1
+
+      - name: Load Redis functions into docker-compose
+        run: cat ./src/cache-tags.lua | redis-cli -x FUNCTION LOAD REPLACE
+
+      - name: Tests
+        working-directory: ./golang
+        run: go test -v ./...
+      
+      

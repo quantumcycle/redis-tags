@@ -54,12 +54,11 @@ There is 2 functions that are required for cleanup.
 
 ## Getting all the tags
 
-The first function is `rt_get_all_tags`. This function returns all the tags we're tracking in redis.
+The first function is `rt_get_tags`. This function returns all the tags we're tracking in redis.
 ```
-FCALL rt_get_all_tags 0 <max> <pattern>
+FCALL rt_get_tags 0 <pattern>
 ```
 Params:
-* max: maximum number of tags to return
 * pattern: prefix pattern for the tags to recover. To get all the tags, use `*`
 * ttl: time to live in seconds. For keys without TTL, use `-1`
 

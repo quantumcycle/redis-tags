@@ -56,36 +56,50 @@ end
 redis.register_function('rt_set', set)
 
 local function del_by_tags(keys, args)
-  
   local tags = {}
   for i,tag in pairs(args) do
     tags[i] = "__rt_tag_" .. tag
   end
 
-  local to_delete = redis.call('SINTER', unpack(to_delete))
+  local to_delete = redis.call('SINTER', unpack(tags))
 
+  local deleted = 0
   for i,hash in pairs(to_delete) do
-    redis.call('DEL', hash)
+    local keys_deleted = redis.call('DEL', hash)
     redis.call('DEL', hash .. "__rt_tags")
+    deleted = deleted + tonumber(keys_deleted)
   end
+
+  return deleted
 
 end
 
 redis.register_function('rt_del_by_tags', del_by_tags)
 
 local function get_tags(keys, args)
-  local max = table.remove(args,1)
   local pattern = table.remove(args,1)
-  local all_tags = redis.call('SCAN', 0, 'MATCH', '__rt_tag_' .. pattern, 'COUNT', max, 'TYPE', 'set')[2]
+  
   local tags = {}
-  for i,tag in pairs(all_tags) do
-    -- remmove the '__rt_tag_' prefix
-    tags[i] = string.sub(tag, 10)
-  end
+  local index = 1
+  local cursor_position = 0
+  repeat
+    local cursor = redis.call('SCAN', cursor_position, 'MATCH', '__rt_tag_' .. pattern, 'COUNT', 1000, 'TYPE', 'set')
+    for i,tag in pairs(cursor[2]) do
+      -- remmove the '__rt_tag_' prefix
+      tags[index] = string.sub(tag, 10)
+      index = index + 1
+    end
+    cursor_position = tonumber(cursor[1])
+  until cursor_position == 0
+
   return tags
 end
 
-redis.register_function('rt_get_tags', get_tags)
+redis.register_function{
+  function_name = 'rt_get_tags',
+  callback = get_tags,
+  flags = { 'no-writes' }
+}
 
 local function cleanup_tag(keys, args)
   local tag = table.remove(args,1)
