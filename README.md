@@ -76,7 +76,7 @@ Params:
 The second function is `rt_cleanup_tag`. This function receives a tag and does the cleanup.
 
 ```
-FCALL cleanup_tag <tag>
+FCALL cleanup_tag 0 <tag>
 ```
 Params:
 * tag: the value of the tag to cleanup
