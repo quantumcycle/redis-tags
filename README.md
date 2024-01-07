@@ -35,7 +35,7 @@ Params:
 * ttl: time to live in seconds. For keys without TTL, use `-1`
 * tags: a list of tags for the key
 
-## Delete a key by tags `rt_del_by_tags`
+## Delete keys by tags `rt_del_by_tags`
 
 This will delete all the keys matching all the tags. This will delete the keys that have ALL the tags passed as argument.
 
@@ -45,6 +45,15 @@ FCALL rt_del_by_tags 0 <tag1> <tag2> <tag3>...
 Params:
 * tags: a list of tags. the deleted keys must have all the specified tags.
 
+## Get keys by tags `rt_del_by_tags`
+
+This will return all the keys matching all the tags. This is an intersection of all the tags, not a union.
+
+```
+FCALL rt_get_keys_by_tags 0 <tag1> <tag2> <tag3>...
+```
+Params:
+* tags: a list of tags. the returned keys must have ALL the specified tags.
 
 # Cleanup job
 

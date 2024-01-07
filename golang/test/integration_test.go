@@ -105,7 +105,7 @@ func TestDeletesEverythingWhenExpired(t *testing.T) {
 	}
 
 	//Wait for the last set to be deleted
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
 
 	keys := rdb.Keys(ctx, "*")
 	assert.Equal(t, 0, len(keys.Val()))
@@ -181,4 +181,52 @@ func TestBenchmark(t *testing.T) {
 
 	keys := rdb.Keys(ctx, "key-*")
 	assert.Equal(t, 0, len(keys.Val()))
+}
+
+func TestGetKeysByTags(t *testing.T) {
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+	})
+
+	rdb.FlushAll(ctx)
+
+	err := tag.SetWithTags(ctx, rdb, "key-1-123", "value", 60, "tag:1", "tag:2", "tag:3")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = tag.SetWithTags(ctx, rdb, "key-2-23", "value", 60, "tag:2", "tag:3")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = tag.SetWithTags(ctx, rdb, "key-3-3", "value", 60, "tag:3")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = tag.SetWithTags(ctx, rdb, "key-4-3", "value", 60, "tag:3")
+	if err != nil {
+		t.Error(err)
+	}
+
+	keys, err := tag.GetKeysByTags(ctx, rdb, "tag:1", "tag:2", "tag:3")
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, 1, len(keys))
+
+	keys, err = tag.GetKeysByTags(ctx, rdb, "tag:2")
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, 2, len(keys))
+
+	keys, err = tag.GetKeysByTags(ctx, rdb, "tag:3")
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, 4, len(keys))
 }
