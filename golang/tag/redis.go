@@ -32,6 +32,22 @@ func DelByTags(ctx context.Context, c *redis.Client, tags ...string) (int, error
 	return int(cmd.Val().(int64)), nil
 }
 
+func GetKeysByTags(ctx context.Context, c *redis.Client, tags ...string) ([]string, error) {
+	params := make([]interface{}, 0, len(tags))
+	for _, tag := range tags {
+		params = append(params, tag)
+	}
+	cmd := c.FCall(ctx, "rt_get_keys_by_tags", nil, params...)
+	if err := cmd.Err(); err != nil && err != redis.Nil {
+		return nil, err
+	}
+	keys, err := cmd.StringSlice()
+	if err != nil && err != redis.Nil {
+		return nil, err
+	}
+	return keys, nil
+}
+
 func GetTags(ctx context.Context, c *redis.Client, pattern string) ([]string, error) {
 	params := make([]interface{}, 0, 1)
 	params = append(params, pattern)

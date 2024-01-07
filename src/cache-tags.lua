@@ -76,6 +76,18 @@ end
 
 redis.register_function('rt_del_by_tags', del_by_tags)
 
+local function get_keys_by_tags(keys, args)
+  local tags = {}
+  for i,tag in pairs(args) do
+    tags[i] = "__rt_tag_" .. tag
+  end
+
+  return redis.call('SINTER', unpack(tags))
+
+end
+
+redis.register_function('rt_get_keys_by_tags', get_keys_by_tags)
+
 local function get_tags(keys, args)
   local pattern = table.remove(args,1)
   
