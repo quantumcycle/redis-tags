@@ -45,7 +45,7 @@ FCALL rt_del_by_tags 0 <tag1> <tag2> <tag3>...
 Params:
 * tags: a list of tags. the deleted keys must have all the specified tags.
 
-## Get keys by tags `rt_del_by_tags`
+## Get keys by tags `rt_get_keys_by_tags`
 
 This will return all the keys matching all the tags. This is an intersection of all the tags, not a union.
 
